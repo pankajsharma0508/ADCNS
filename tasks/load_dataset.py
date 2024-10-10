@@ -6,6 +6,10 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 # Add the parent directory to the path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 #from tasks import DataAnalyzer,DataLoader,cleandata
@@ -28,11 +32,11 @@ class DataLoader:
         logger.info("Dataset loaded successfully.")
 
         # Remove unwanted columns
-        logger.info("Removing unwanted columns like umpire information")
-        self.df.drop(['umpire2', 'umpire3', 'umpire1'], axis=1, inplace=True)
+        logger.info("Removing unwanted columns like 'season','date','id','umpire2', 'umpire3', 'umpire1'")
+        self.df.drop(['season','date','id','umpire2', 'umpire3', 'umpire1'], axis=1, inplace=True)
 
         # Remove records with no winner
-        logger.info("Removing records which have no winner as they are not needed.")
+        logger.info("Filterig records which have no winner as they are not needed.")
         self.df = self.df.dropna(subset=['winner'])
 
         # Changing object types to string datatypes for relevant columns
@@ -42,11 +46,8 @@ class DataLoader:
         self.df[string_columns] = self.df[string_columns].astype('string')
 
         # Convert 'date' column to datetime
-        logger.info("Converting 'date' column to datetime format")
-        self.df['date'] = pd.to_datetime(self.df['date'], errors='coerce')  # Handle invalid dates as NaT
-
-        # Log DataFrame head
-        logger.info(f"DataFrame head:\n{self.df.head()}")
+        #logger.info("Converting 'date' column to datetime format")
+        #   logger.info(f"DataFrame head:\n{self.df.head()}")
 
         return self.df
     
@@ -139,6 +140,72 @@ class DataAnalyzer:
         plt.savefig(".\output\plot_matches_per_team.png")
         logger.info("Scatter plot saved as 'plot_matches_per_team.png'")
 
+    def plot_match_per_venue(self):
+        plt.figure(figsize = (10,6))
+        sns.countplot(y = 'venue',data = self.df,order = self.df['venue'].value_counts().iloc[:10].index)
+        plt.xlabel('No of matches',fontsize=12)
+        plt.ylabel('Venue',fontsize=12)
+        plt.title('Total Number of matches played in different stadium')
+        plt.tight_layout()
+        
+        # Display the plot
+        #plt.show()
+
+        # Save the plot to a buffer
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+
+        # Encode the image in base64 and log it
+        img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        #logger.info("Scatter plot image (base64 encoded):")
+        #logger.info(f"data:image/png;base64,{img_base64}")
+
+        # Save the plot as a file
+        plt.savefig(".\output\plot_matches_per_venue.png")
+        logger.info("Scatter plot saved as 'plot_matches_per_venue.png'")
+
+    def train_model(self):
+        # Dropping the target column and printing feature columns
+        #print(self.df.describe)
+        print('Here')
+        print(self.df.columns)
+        X = self.df.drop(["winner"], axis=1)
+        print(X.columns)
+
+        # Target variable
+        y = self.df["winner"]
+
+        # # Apply one-hot encoding on categorical variables
+        # X = pd.get_dummies(X, columns=["team1", "team2", "toss_winner", "toss_decision", "result"], drop_first=True)
+
+        # # Encoding target labels
+        # le = LabelEncoder()
+        # y = le.fit_transform(y)
+
+        # # Split data into train and test sets
+        # x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, random_state=42)
+
+        # # Initialize the model
+        # model = RandomForestClassifier(n_estimators=200, min_samples_split=3, max_features="sqrt")  # Updated max_features
+
+        # # Fit the model on training data
+        # model.fit(x_train, y_train)
+
+        # # Predict on the test data
+        # y_pred = model.predict(x_test)
+
+        # # Calculate and print accuracy
+        # ac = accuracy_score(y_pred, y_test)
+        # print('Model Accuracy:', ac)
+
+
+
+
+#def Encode(self):
+
+    
+
 def main():
     # Load and preprocess data
     data_loader = DataLoader(file_path=".\data\matches.csv")
@@ -153,7 +220,9 @@ def main():
 
     # since IPL team names are chnages over the year use the laters team name 
     df = data_analyzer.clean_data()
-    data_analyzer.plot_matches_per_team()
+    #data_analyzer.plot_matches_per_team()
+    #data_analyzer.plot_match_per_venue()
+    data_analyzer.train_model()
 
 
 if __name__ == "__main__":
