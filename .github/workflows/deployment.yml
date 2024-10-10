@@ -2,29 +2,40 @@ name: Deploy Prefect Flow
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  deploy:
+  run-prefect-workflows:
     runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout Code
+  steps:
+    - name: Check out repository
       uses: actions/checkout@v2
 
-    - name: Set up Python
+    - name: Set up Python 3.10
       uses: actions/setup-python@v2
       with:
-        python-version: '3.9'
-
-    - name: Install Dependencies
+        python-version: '3.10'
+    
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install prefect
-
-    - name: Run Prefect Flow
+        pip install -r requirements.txt
+  
+    - name: Authenticate with Prefect Cloud
       env:
-        PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
+          PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
+          WORKSPACE_KEY: ${{ secrets.WORKSPACE_KEY }}
       run: |
-        prefect run -p path/to/your_flow.py
+        prefect cloud login --key $PREFECT_API_KEY --workspace 'pankaj-sharma/default'
+  
+    - name: Run Prefect deployment on Prefect Cloud
+      env:
+         WORKSPACE_KEY: ${{ secrets.WORKSPACE_KEY }}
+        run: |
+          prefect deployment run 'main-flow/covid-ds-workflow' --workspace-key $WORKSPACE_KEY
+  
+
+ 
