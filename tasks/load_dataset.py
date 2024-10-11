@@ -33,17 +33,18 @@ class DataLoader:
 
         # Remove unwanted columns
         logger.info("Removing unwanted columns like 'season','date','id','umpire2', 'umpire3', 'umpire1'")
-        self.df.drop(['season','date','id','umpire2', 'umpire3', 'umpire1'], axis=1, inplace=True)
+        #self.df.drop(['season','date','id','umpire2', 'umpire3', 'umpire1'], axis=1, inplace=True)
+        self.df.drop(["id", "season","city","date", "player_of_match", 'umpire1', "venue", "umpire2","umpire3"], axis=1, inplace=True)
 
         # Remove records with no winner
-        logger.info("Filterig records which have no winner as they are not needed.")
-        self.df = self.df.dropna(subset=['winner'])
+        #logger.info("Filterig records which have no winner as they are not needed.")
+        #self.df = self.df.dropna(subset=['winner'])
 
         # Changing object types to string datatypes for relevant columns
         logger.info("Changing object types to string datatypes for string type columns")
-        string_columns = ['city', 'team1', 'team2', 'toss_winner', 'toss_decision',
-                          'winner', 'result', 'player_of_match', 'venue']
-        self.df[string_columns] = self.df[string_columns].astype('string')
+        #string_columns = [ 'team1', 'team2', 'toss_winner', 'toss_decision',
+        #                  'winner', 'result', 'venue']
+        #self.df[string_columns] = self.df[string_columns].astype('string')
 
         # Convert 'date' column to datetime
         #logger.info("Converting 'date' column to datetime format")
@@ -168,41 +169,38 @@ class DataAnalyzer:
     def train_model(self):
         # Dropping the target column and printing feature columns
         #print(self.df.describe)
-        print('Here')
-        print(self.df.columns)
+        logger.info('Traning the model started ')
+        #logger.info(self.df.describe)
+        logger.info(self.df.columns)
         X = self.df.drop(["winner"], axis=1)
-        print(X.columns)
-
+        #X= self.df.drop(["city", "player_of_match", "venue"], axis=1, inplace=True)
+                
         # Target variable
         y = self.df["winner"]
 
-        # # Apply one-hot encoding on categorical variables
-        # X = pd.get_dummies(X, columns=["team1", "team2", "toss_winner", "toss_decision", "result"], drop_first=True)
+        logger.info('## Apply one-hot encoding on categorical variables')
+        X = pd.get_dummies(X, ["team1","team2", "toss_winner", "toss_decision", "result"], drop_first = True)
 
         # # Encoding target labels
-        # le = LabelEncoder()
-        # y = le.fit_transform(y)
+        le = LabelEncoder()
+        y = le.fit_transform(y)
 
         # # Split data into train and test sets
-        # x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, random_state=42)
+        x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, random_state=42)
 
         # # Initialize the model
-        # model = RandomForestClassifier(n_estimators=200, min_samples_split=3, max_features="sqrt")  # Updated max_features
+        model = RandomForestClassifier(n_estimators=200, min_samples_split=3, max_features="sqrt")  # Updated max_features
 
         # # Fit the model on training data
-        # model.fit(x_train, y_train)
+        model.fit(x_train, y_train)
 
         # # Predict on the test data
-        # y_pred = model.predict(x_test)
+        y_pred = model.predict(x_test)
 
         # # Calculate and print accuracy
-        # ac = accuracy_score(y_pred, y_test)
-        # print('Model Accuracy:', ac)
+        ac = accuracy_score(y_pred, y_test)
+        logger.info('Model Accuracy:', ac)
 
-
-
-
-#def Encode(self):
 
     
 
@@ -220,8 +218,8 @@ def main():
 
     # since IPL team names are chnages over the year use the laters team name 
     df = data_analyzer.clean_data()
-    #data_analyzer.plot_matches_per_team()
-    #data_analyzer.plot_match_per_venue()
+    data_analyzer.plot_matches_per_team()
+    data_analyzer.plot_match_per_venue()
     data_analyzer.train_model()
 
 
