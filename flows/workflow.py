@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import json  # Assuming the dataset will be in JSON format, adjust if needed
 import tempfile
+from prefect.artifacts import create_link_artifact
 from io import StringIO
 @task(log_prints=True)
 def run_task(script_name):
@@ -98,6 +99,12 @@ def preprocess_data(dataset):
 
 @flow
 def main_flow():
+     
+    create_link_artifact(
+            key="irregular-data",
+            link="https://www.kaggle.com/datasets/saurav9786/indian-premier-league-match-analysis",
+            description="## This is a sample artifact ",
+        )
     logger = get_run_logger()
     # Run the load_dataset task
     dataset = run_task("load_dataset.py")
@@ -115,6 +122,11 @@ def main_flow():
         run_task("data-analysis.py")
         logger.info('starting  model traning ')
         run_task('train-model.py')
+
+        logger.info("Connecting to prefect with REST API ");
+        run_task('../api/deploymentAPI.py')
+        run_task('../api/flowApi.py')
+        run_task('../api/api.py')
         
         
 
