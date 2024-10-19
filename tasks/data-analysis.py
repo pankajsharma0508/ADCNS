@@ -51,6 +51,37 @@ def plot_match_per_venue(df):
     plt.savefig(file_path)
     logger.info(f"Plot saved as {file_path}")
 
+def toss_winner(df):
+    plt.figure(figsize=(10, 6))
+    sns.countplot( x = 'toss_winner', data = df)
+    plt.xticks(rotation='vertical')
+   
+    plt.xlabel('Teams', fontsize=12)
+    plt.ylabel('Count of Toss', fontsize=12)
+    plt.title('Total Number of toss winner')
+    plt.tight_layout()
+
+    output_folder = create_output_folder()
+    file_path = os.path.join(output_folder, 'toss_winner.png')
+    plt.savefig(file_path)
+    logger.info(f"Plot saved as {file_path}")
+
+def best_Player(df):
+    top_players = df.player_of_match.value_counts()[:10]
+    #sns.barplot(x="day", y="total_bill", data=tips)
+    fig, ax = plt.subplots()
+    ax.set_ylim([0,20])
+    ax.set_ylabel("Number of Awards")
+    ax.set_xlabel("Name of Players")
+    ax.set_title("Top player of the match Winners")
+    #top_players.plot.bar()
+    sns.barplot(x = top_players.index, y = top_players, orient='v', palette="RdBu");
+    plt.xticks(rotation = 'vertical')
+    output_folder = create_output_folder()
+    file_path = os.path.join(output_folder, 'top_player.png')
+    plt.savefig(file_path)
+    logger.info(f"Plot saved as {file_path}")
+
 def process_data(file_name):
     # Define the path to the '../data' folder
     data_folder_path = os.path.join(os.path.dirname(__file__), '../data')
@@ -72,6 +103,8 @@ def process_data(file_name):
         # Call plotting functions
         plot_matches_per_team(dataset)
         plot_match_per_venue(dataset)
+        toss_winner(dataset)
+        best_Player(dataset)
          # Convert the DataFrame to a JSON string
         #dataset_json = dataset.to_json(orient="records")
         # Output the dataset as JSON

@@ -17,26 +17,31 @@ logger = logging.getLogger(__name__)
 # Shared Data Preprocessing Function
 def preprocess_data(df):
     """Preprocesses the data by applying one-hot encoding and label encoding."""
+    
     X = df.drop(["winner", "venue"], axis=1)
     y = df["winner"]
 
     # One-hot encoding for categorical variables
-    X = pd.get_dummies(X, columns=["team1", "team2", "toss_winner", "toss_decision", "result"], drop_first=True)
+    X = pd.get_dummies(X, columns=["team1", "team2", "toss_winner", "toss_decision", "result","player_of_match"], drop_first=True)
 
     # Label encoding for the target variable
     le = LabelEncoder()
     y = le.fit_transform(y)
 
-    return X, y
+    return X, y, le  # Return LabelEncoder for later use
 
 # Function to evaluate a model and return metrics
-def evaluate_model(y_test, y_pred, model_name):
+def evaluate_model(y_test, y_pred, model_name, model, label_encoder):
     """Evaluates the model on several metrics and prints the results."""
     accuracy = accuracy_score(y_test, y_pred)
     precision = precision_score(y_test, y_pred, average='weighted', zero_division=1)
     recall = recall_score(y_test, y_pred, average='weighted', zero_division=1)
     f1 = f1_score(y_test, y_pred, average='weighted', zero_division=1)
     cm = confusion_matrix(y_test, y_pred)
+
+    # Get the class labels from the label encoder
+    class_labels = label_encoder.classes_
+    print (class_labels)
 
     logger.info(f'{model_name} Results:')
     logger.info(f'Accuracy: {accuracy:.4f}')
@@ -50,9 +55,9 @@ def evaluate_model(y_test, y_pred, model_name):
     print(f"Recall: {recall:.4f}")
     print(f"F1-Score: {f1:.4f}")
     
-    # Plotting the confusion matrix
+    # Plotting the confusion matrix with actual class labels
     plt.figure(figsize=(6, 4))
-    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=class_labels, yticklabels=class_labels)
     plt.title(f'{model_name} - Confusion Matrix')
     plt.xlabel('Predicted')
     plt.ylabel('True')
@@ -63,36 +68,36 @@ def evaluate_model(y_test, y_pred, model_name):
     return accuracy, precision, recall, f1
 
 # Function for training Random Forest
-def train_random_forest(X_train, X_test, y_train, y_test):
+def train_random_forest(X_train, X_test, y_train, y_test, label_encoder):
     logger.info('Training RandomForestClassifier')
     model = RandomForestClassifier(n_estimators=200, min_samples_split=3, max_features="sqrt")
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     #joblib.dump(model, "./output/random_forest_model.pkl")
-    return evaluate_model(y_test, y_pred, "Random Forest")
+    return evaluate_model(y_test, y_pred, "Random Forest", model=model, label_encoder=label_encoder)
 
 # Function for training Logistic Regression
-def train_logistic_regression(X_train, X_test, y_train, y_test):
+def train_logistic_regression(X_train, X_test, y_train, y_test, label_encoder):
     logger.info('Training LogisticRegression')
     model = LogisticRegression(max_iter=200)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     #joblib.dump(model, "./output/logistic_regression_model.pkl")
-    return evaluate_model(y_test, y_pred, "Logistic Regression")
+    return evaluate_model(y_test, y_pred, "Logistic Regression", model=model, label_encoder=label_encoder)
 
 # Function for training K-Nearest Neighbors
-def train_knn(X_train, X_test, y_train, y_test):
+def train_knn(X_train, X_test, y_train, y_test, label_encoder):
     logger.info('Training KNeighborsClassifier')
     model = KNeighborsClassifier(n_neighbors=5)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     #joblib.dump(model, "./output/knn_model.pkl")
-    return evaluate_model(y_test, y_pred, "K-Nearest Neighbors")
+    return evaluate_model(y_test, y_pred, "K-Nearest Neighbors", model=model, label_encoder=label_encoder)
 
 # Function to compare different algorithms
 def compare_algorithms(df):
     logger.info('Preprocessing the data')
-    X, y = preprocess_data(df)
+    X, y, label_encoder = preprocess_data(df)
 
     # Split the data into train and test sets
     logger.info('Splitting data into training and testing sets')
@@ -102,13 +107,13 @@ def compare_algorithms(df):
     logger.info('Comparing models')
 
     print("\nRandom Forest:")
-    rf_metrics = train_random_forest(X_train, X_test, y_train, y_test)
+    rf_metrics = train_random_forest(X_train, X_test, y_train, y_test, label_encoder)
     
     print("\nLogistic Regression:")
-    lr_metrics = train_logistic_regression(X_train, X_test, y_train, y_test)
+    lr_metrics = train_logistic_regression(X_train, X_test, y_train, y_test, label_encoder)
     
     print("\nK-Nearest Neighbors:")
-    knn_metrics = train_knn(X_train, X_test, y_train, y_test)
+    knn_metrics = train_knn(X_train, X_test, y_train, y_test, label_encoder)
 
     # Print the results in a comparison format
     print("\nModel Comparison (Accuracy, Precision, Recall, F1-Score):")
@@ -131,6 +136,7 @@ def process_data_and_train(file_name):
         df = pd.read_csv(file_path)
         print(f"Dataset loaded successfully: {df.shape} rows, {df.shape[1]} columns")
         
+        #encode(df)
         # Compare algorithms
         compare_algorithms(df)
     

@@ -4,6 +4,7 @@ import logging
 import os
 
 from prefect import get_run_logger
+from sklearn.calibration import LabelEncoder
 
 
 # Configure standard logging
@@ -43,7 +44,7 @@ def clean_data(df):
         # logger.info(team_counts)
 
         print('IPL teams list ')
-        print(team_counts)
+        #print(team_counts)
 
         print('Replace values in team1 , team2 column Delhi Daredevils -> Delhi Capitals and Deccan Chargers -> Sunrisers Hyderabad')
         df['team1'] = df['team1'].replace('Delhi Daredevils', 'Delhi Capitals')
@@ -52,6 +53,10 @@ def clean_data(df):
         # Replace values in 'team2' column
         df['team2'] = df['team2'].replace('Delhi Daredevils', 'Delhi Capitals')
         df['team2'] = df['team2'].replace('Deccan Chargers', 'Sunrisers Hyderabad')
+
+           # Replace values in 'team2' column
+        df['team1'] = df['team1'].replace('Rising Pune Supergiant', 'Rising Pune Supergiants')
+        df['team2'] = df['team2'].replace('Rising Pune Supergiant', 'Rising Pune Supergiants')
 
         # Log the number of rows containing 'Deccan Chargers' in 'team1'
         deccan_rows = df.loc[df['team1'] == 'Deccan Chargers']
@@ -64,12 +69,21 @@ def clean_data(df):
         team_counts = df['team1'].value_counts()
         print('IPL teams list after replacement')
         print(team_counts)
+        #encode(df)
+        print('Updating missing values in city  player of the match and winner and umpires columns')
+        df['city'].fillna('Dubai',inplace=True)
+        df['umpire1'].fillna('Aleem Dar',inplace=True)
+        df['umpire2'].fillna('Aleem Dar',inplace=True)
+        df['umpire3'].fillna('Aleem Dar',inplace=True)
+        df['player_of_match'].fillna('N/A',inplace=True)
+        missing_vals = df.isnull().sum()
+        print(f"\n checking again missing values{missing_vals}")
         remove_columns(df)
        
         
 def remove_columns(df):
      print('removing columns id, season,city,date, player_of_match, umpire1, umpire2,umpire3 ')
-     df.drop(["id", "season","city","date", "player_of_match", 'umpire1', "umpire2","umpire3"], axis=1, inplace=True)
+     df.drop(["id", "season","city","date", 'umpire1', "umpire2","umpire3"], axis=1, inplace=True)
      print('after remove')
      save_to_file(df,'dataset_pre.csv')
      return df
