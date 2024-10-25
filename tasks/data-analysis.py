@@ -65,6 +65,30 @@ def toss_winner(df):
     file_path = os.path.join(output_folder, 'toss_winner.png')
     plt.savefig(file_path)
     logger.info(f"Plot saved as {file_path}")
+def plot_pie_win_by_wickets(df):
+    plt.figure(figsize=(8, 8))
+    win_by_wickets_counts = df['win_by_wickets_bins'].value_counts()
+    plt.pie(win_by_wickets_counts, labels=win_by_wickets_counts.index, autopct='%1.1f%%', startangle=140, colors=sns.color_palette('plasma', len(win_by_wickets_counts)))
+    plt.title('Distribution of Wins by Wickets')
+    plt.axis('equal')
+    output_folder = create_output_folder()
+    file_path = os.path.join(output_folder, 'plot_pie_win_by_wickets.png')
+    plt.savefig(file_path)
+    logger.info(f"Plot saved as {file_path}")
+
+def plot_pie_win_by_runs(df):
+    plt.figure(figsize=(8, 8))
+    win_by_runs_counts = df['win_by_runs_bins'].value_counts()
+    plt.pie(win_by_runs_counts, labels=win_by_runs_counts.index, autopct='%1.1f%%', startangle=140, colors=sns.color_palette('viridis', len(win_by_runs_counts)))
+    plt.title('Distribution of Wins by Runs')
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    output_folder = create_output_folder()
+    file_path = os.path.join(output_folder, 'plot_pie_win_by_runs.png')
+    plt.savefig(file_path)
+    logger.info(f"Plot saved as {file_path}")
+
+
+
 
 def best_Player(df):
     top_players = df.player_of_match.value_counts()[:10]
@@ -105,6 +129,8 @@ def process_data(file_name):
         plot_match_per_venue(dataset)
         toss_winner(dataset)
         best_Player(dataset)
+        plot_pie_win_by_runs(dataset)
+        plot_pie_win_by_wickets(dataset)
          # Convert the DataFrame to a JSON string
         #dataset_json = dataset.to_json(orient="records")
         # Output the dataset as JSON

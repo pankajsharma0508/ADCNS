@@ -33,6 +33,32 @@ def save_to_file(dataset: pd.DataFrame, file_name: str):
     print(f"CSV file created: {csv_file_path}")
     return csv_file_path
 
+
+import pandas as pd
+
+def bin_win_by_runs(df):
+    # Update win_by_runs to None where win_by_wickets has a non-zero value
+    df.loc[df['win_by_wickets'] > 0, 'win_by_runs'] = None
+    
+    # Define updated bins for win_by_runs
+    bins_runs = [0, 5, 15, 30, 50, 100]  # 6 edges for 5 labels
+    labels_runs = ['0-5', '6-15', '16-30', '31-50', '51+']  # 5 labels
+    df['win_by_runs_bins'] = pd.cut(df['win_by_runs'], bins=bins_runs, labels=labels_runs, right=False)
+    
+    return df
+
+def bin_win_by_wickets(df):
+    # Define updated bins for win_by_wickets
+    bins_wickets = [0, 1, 3, 5]  # 4 edges for 3 labels
+    labels_wickets = ['0', '1-2', '3+']  # 3 labels
+    df['win_by_wickets_bins'] = pd.cut(df['win_by_wickets'], bins=bins_wickets, labels=labels_wickets, right=False)
+    
+    return df
+
+def Perform_Binning(df):
+    bin_win_by_runs(df)
+    bin_win_by_wickets(df)
+
 def clean_data(df):
         
         #logger.info("Cleaning up teams names from the dataset:")
@@ -78,12 +104,16 @@ def clean_data(df):
         df['player_of_match'].fillna('N/A',inplace=True)
         missing_vals = df.isnull().sum()
         print(f"\n checking again missing values{missing_vals}")
+
+        print ("Performing Binning on win by run and win by wickets columns")
+        Perform_Binning(df)
+        print(df)
         remove_columns(df)
        
         
 def remove_columns(df):
      print('removing columns id, season,city,date, player_of_match, umpire1, umpire2,umpire3 ')
-     df.drop(["id", "season","city","date", 'umpire1', "umpire2","umpire3"], axis=1, inplace=True)
+     df.drop(["id", "season","city","date", 'umpire1', "umpire2","umpire3","win_by_runs","win_by_wickets"], axis=1, inplace=True)
      print('after remove')
      save_to_file(df,'dataset_pre.csv')
      return df
