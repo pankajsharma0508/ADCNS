@@ -68,7 +68,8 @@ def toss_winner(df):
 def plot_pie_win_by_wickets(df):
     plt.figure(figsize=(8, 8))
     win_by_wickets_counts = df['win_by_wickets_bins'].value_counts()
-    plt.pie(win_by_wickets_counts, labels=win_by_wickets_counts.index, autopct='%1.1f%%', startangle=140, colors=sns.color_palette('plasma', len(win_by_wickets_counts)))
+    filtered_counts = win_by_wickets_counts[win_by_wickets_counts != 0]
+    plt.pie(filtered_counts, labels=win_by_wickets_counts.index, autopct='%1.1f%%', startangle=140, colors=sns.color_palette('plasma', len(win_by_wickets_counts)))
     plt.title('Distribution of Wins by Wickets')
     plt.axis('equal')
     output_folder = create_output_folder()
@@ -79,7 +80,8 @@ def plot_pie_win_by_wickets(df):
 def plot_pie_win_by_runs(df):
     plt.figure(figsize=(8, 8))
     win_by_runs_counts = df['win_by_runs_bins'].value_counts()
-    plt.pie(win_by_runs_counts, labels=win_by_runs_counts.index, autopct='%1.1f%%', startangle=140, colors=sns.color_palette('viridis', len(win_by_runs_counts)))
+    filtered_counts = win_by_runs_counts[win_by_runs_counts != 0]
+    plt.pie(filtered_counts, labels=win_by_runs_counts.index, autopct='%1.1f%%', startangle=140, colors=sns.color_palette('viridis', len(win_by_runs_counts)))
     plt.title('Distribution of Wins by Runs')
     plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
     output_folder = create_output_folder()

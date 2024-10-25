@@ -56,13 +56,13 @@ def evaluate_model(y_test, y_pred, model_name, model, label_encoder):
     print(f"F1-Score: {f1:.4f}")
     
     # Plotting the confusion matrix with actual class labels
-    plt.figure(figsize=(6, 4))
-    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=class_labels, yticklabels=class_labels)
-    plt.title(f'{model_name} - Confusion Matrix')
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
-    plt.tight_layout()
-    plt.savefig(f"./output/{model_name}_confusion_matrix.png")
+    # plt.figure(figsize=(6, 4))
+    # sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=class_labels, yticklabels=class_labels)
+    # plt.title(f'{model_name} - Confusion Matrix')
+    # plt.xlabel('Predicted')
+    # plt.ylabel('True')
+    # plt.tight_layout()
+    # plt.savefig(f"./output/{model_name}_confusion_matrix.png")
     #plt.show()
     
     return accuracy, precision, recall, f1

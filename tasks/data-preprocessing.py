@@ -38,20 +38,26 @@ import pandas as pd
 
 def bin_win_by_runs(df):
     # Update win_by_runs to None where win_by_wickets has a non-zero value
-    df.loc[df['win_by_wickets'] > 0, 'win_by_runs'] = None
     
+    filtered_df = df[df['win_by_runs'] > 0].copy()
     # Define updated bins for win_by_runs
-    bins_runs = [0, 5, 15, 30, 50, 100]  # 6 edges for 5 labels
-    labels_runs = ['0-5', '6-15', '16-30', '31-50', '51+']  # 5 labels
-    df['win_by_runs_bins'] = pd.cut(df['win_by_runs'], bins=bins_runs, labels=labels_runs, right=False)
+    # Define bins and labels
+    bins_runs = [0, 5, 15, 30, 50, 100, 151]  # Note: 151 is used to include 150 in the last bin
+    labels_runs = ['0-5', '6-15', '16-30', '31-50', '51-100', '101-150']
+    df['win_by_runs_bins'] = pd.cut(filtered_df['win_by_runs'], bins=bins_runs, labels=labels_runs, right=False)
+    
     
     return df
 
 def bin_win_by_wickets(df):
     # Define updated bins for win_by_wickets
-    bins_wickets = [0, 1, 3, 5]  # 4 edges for 3 labels
-    labels_wickets = ['0', '1-2', '3+']  # 3 labels
-    df['win_by_wickets_bins'] = pd.cut(df['win_by_wickets'], bins=bins_wickets, labels=labels_wickets, right=False)
+    df['win_by_wickets'] = pd.to_numeric(df['win_by_wickets'], errors='coerce')
+    filtered_df = df[df['win_by_wickets'] > 0].copy()
+    
+    bins_wickets =  [1, 3, 6, 11] # 4 edges for 3 labels
+    labels_wickets = ['wkt(<2)', 'wkt(<3-5)', 'wkt(>6)']  # 3 labels
+     # Create bins for win_by_wickets
+    df['win_by_wickets_bins'] = pd.cut(filtered_df['win_by_wickets'], bins=bins_wickets, labels=labels_wickets, right=False)
     
     return df
 
@@ -97,11 +103,19 @@ def clean_data(df):
         print(team_counts)
         #encode(df)
         print('Updating missing values in city  player of the match and winner and umpires columns')
-        df['city'].fillna('Dubai',inplace=True)
-        df['umpire1'].fillna('Aleem Dar',inplace=True)
-        df['umpire2'].fillna('Aleem Dar',inplace=True)
-        df['umpire3'].fillna('Aleem Dar',inplace=True)
-        df['player_of_match'].fillna('N/A',inplace=True)
+        
+        fill_values = {
+            'city': 'Dubai',
+            'umpire1': 'Aleem Dar',
+            'umpire2': 'Aleem Dar',
+            'umpire3': 'Aleem Dar',
+            'player_of_match': 'N/A'
+        }
+
+        for column, value in fill_values.items():
+          df.loc[:, column] = df[column].fillna(value)
+
+
         missing_vals = df.isnull().sum()
         print(f"\n checking again missing values{missing_vals}")
 
@@ -109,11 +123,12 @@ def clean_data(df):
         Perform_Binning(df)
         print(df)
         remove_columns(df)
-       
+        print(df.dtypes)
+        
         
 def remove_columns(df):
      print('removing columns id, season,city,date, player_of_match, umpire1, umpire2,umpire3 ')
-     df.drop(["id", "season","city","date", 'umpire1', "umpire2","umpire3","win_by_runs","win_by_wickets"], axis=1, inplace=True)
+     df.drop(["id", "season","city","date", 'umpire1', "umpire2","umpire3"], axis=1, inplace=True)
      print('after remove')
      save_to_file(df,'dataset_pre.csv')
      return df
