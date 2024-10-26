@@ -6,6 +6,7 @@ import json  # Assuming the dataset will be in JSON format, adjust if needed
 import tempfile
 from prefect.artifacts import create_link_artifact
 from io import StringIO
+
 @task(log_prints=True)
 def run_task(script_name):
     logger = get_run_logger()

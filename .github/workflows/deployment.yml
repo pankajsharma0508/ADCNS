@@ -34,8 +34,8 @@ jobs:
     - name: Run Prefect deployment on Prefect Cloud
       env:
          WORKSPACE_KEY: ${{ secrets.WORKSPACE_KEY }}
-        run: |
-          prefect deployment run 'main-flow/covid-ds-workflow' --workspace-key $WORKSPACE_KEY
+      run: |
+          prefect deployment run 'main-flow/win-predictor-dataset' --workspace-key $WORKSPACE_KEY
   
 
  
