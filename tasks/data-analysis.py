@@ -65,6 +65,7 @@ def toss_winner(df):
     file_path = os.path.join(output_folder, 'toss_winner.png')
     plt.savefig(file_path)
     logger.info(f"Plot saved as {file_path}")
+
 def plot_pie_win_by_wickets(df):
     plt.figure(figsize=(8, 8))
     win_by_wickets_counts = df['win_by_wickets_bins'].value_counts()
@@ -88,8 +89,6 @@ def plot_pie_win_by_runs(df):
     file_path = os.path.join(output_folder, 'plot_pie_win_by_runs.png')
     plt.savefig(file_path)
     logger.info(f"Plot saved as {file_path}")
-
-
 
 
 def best_Player(df):
