@@ -35,4 +35,4 @@ jobs:
         env:
           WORKSPACE_KEY: ${{ secrets.WORKSPACE_KEY }}
         run: |
-          prefect deployment run 'main-flow/win-predictor-dataset' --workspace-key $WORKSPACE_KEY
+          prefect deployment run 'main-flow/win-predictor-dataset'
